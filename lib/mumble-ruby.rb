@@ -21,6 +21,7 @@ module Mumble
   DEFAULTS = {
     sample_rate: 48000,
     bitrate: 32000,
+    audio_channels: 1,
     ssl_cert_opts: {
       cert_dir: File.expand_path("./"),
       country_code: "US",
