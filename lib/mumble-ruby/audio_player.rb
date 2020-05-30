@@ -141,7 +141,7 @@ module Mumble
         @encoder.vbr_rate = bitrate
         @encoder.prediction_request = 0
       else
-        @encoder = Opus::Encoder.new sample_rate, @framesize, @channels, @framesize * 2 * @channels
+        @encoder = Opus::Encoder.new sample_rate, @framesize * @channels, @channels, @framesize * 2 * @channels
         @encoder.bitrate = bitrate
         @encoder.opus_set_signal Opus::Constants::OPUS_SIGNAL_MUSIC # alternative OPUS_SIGNAL_VOICE  but then constrainded vbr not work.
         begin
