@@ -83,7 +83,7 @@ module Mumble
       unless @m2m == nil
         return
       end
-      @m2m = Mumble2Mumble.new @codec, @conn, @config.sample_rate, @config.sample_rate / 100, 1, @config.bitrate
+      @m2m = Mumble2Mumble.new @codec, @conn, @config.sample_rate, @config.sample_rate / 100, @config.audio_channels, @config.bitrate
       if rec == true then
         on_udp_tunnel do |m|
           @m2m.process_udp_tunnel m

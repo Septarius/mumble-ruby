@@ -61,8 +61,8 @@ module Mumble
         require 'ruby-portaudio'
         PortAudio.init
         unless playing?
-          @portaudio = PortAudio::Stream.open( :sample_rate => 48000, :frames => 8192, :input => { :device => PortAudio::Device.default_input, :channels => 1, :sample_format => :int16, :suggested_latency => 0.05 })
-          @audiobuffer = PortAudio::SampleBuffer.new( :format => :float32, :channels => 1, :frames => @framesize)
+          @portaudio = PortAudio::Stream.open( :sample_rate => 48000, :frames => 8192, :input => { :device => PortAudio::Device.default_input, :channels => @config.audio_channels, :sample_format => :int16, :suggested_latency => 0.05 })
+          @audiobuffer = PortAudio::SampleBuffer.new( :format => :float32, :channels => @config.audio_channels, :frames => @framesize)
           @portaudio.start
           spawn_threads :portaudio
           @playing = true
@@ -114,7 +114,7 @@ module Mumble
       @framesize= COMPRESSED_SIZE * framelength
       begin
         @encoder.set_frame_size @framesize
-        @audiobuffer = PortAudio::SampleBuffer.new( :format => :float32, :channels => 1, :frames => @framesize) if !@portaudio.stopped?
+        @audiobuffer = PortAudio::SampleBuffer.new( :format => :float32, :channels => @config.audio_channels, :frames => @framesize) if !@portaudio.stopped?
       rescue
       end
     end
@@ -136,11 +136,11 @@ module Mumble
       @encoder.destroy if @encoder != nil 
 
       if @type == CODEC_ALPHA || @type == CODEC_BETA
-        @encoder = Celt::Encoder.new sample_rate, sample_rate / 100, 1, [bitrate / 800, 127].min
+        @encoder = Celt::Encoder.new sample_rate, sample_rate / 100, @config.audio_channels, [bitrate / 800, 127].min
         @encoder.vbr_rate = bitrate
         @encoder.prediction_request = 0
       else
-        @encoder = Opus::Encoder.new sample_rate, @framesize, 1, 7200
+        @encoder = Opus::Encoder.new sample_rate, @framesize, @config.audio_channels, 7200
         @encoder.bitrate = bitrate
         @encoder.opus_set_signal Opus::Constants::OPUS_SIGNAL_MUSIC # alternative OPUS_SIGNAL_VOICE  but then constrainded vbr not work.
         begin
