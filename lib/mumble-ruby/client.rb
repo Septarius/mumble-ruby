@@ -64,7 +64,7 @@ module Mumble
 
     def recorder
       raise NoSupportedCodec unless @codec
-      @recorder ||= AudioRecorder.new self, @config.sample_rate
+      @recorder ||= AudioRecorder.new self, @config.sample_rate, @config.audio_channels
     end
 
     def get_codec
@@ -125,7 +125,7 @@ module Mumble
 
     def player
       raise NoSupportedCodec unless @codec
-      @audio_streamer ||= AudioPlayer.new @codec, @conn, @config.sample_rate, @config.bitrate
+      @audio_streamer ||= AudioPlayer.new @codec, @conn, @config.sample_rate, @config.bitrate, @config.audio_channels
     end
 
     def me
