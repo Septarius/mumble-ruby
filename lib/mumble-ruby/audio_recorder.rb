@@ -10,7 +10,7 @@ module Mumble
 
     def initialize(client, sample_rate)
       @client = client
-      @wav_format = WaveFile::Format.new(:mono, :pcm_16, sample_rate)
+      @wav_format = WaveFile::Format.new(@config.audio_channels, :pcm_16, sample_rate)
       @pds = PacketDataStream.new
       @pds_lock = Mutex.new
 
