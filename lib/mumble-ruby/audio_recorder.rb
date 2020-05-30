@@ -8,9 +8,11 @@ module Mumble
     CODEC_BETA = 3
     CODEC_OPUS = 4
 
-    def initialize(client, sample_rate)
+    def initialize(client, sample_rate, channels)
       @client = client
-      @wav_format = WaveFile::Format.new(@config.audio_channels, :pcm_16, sample_rate)
+      @channels = channels
+      @sample_rate = sample_rate
+      @wav_format = WaveFile::Format.new(@channels, :pcm_16, sample_rate)
       @pds = PacketDataStream.new
       @pds_lock = Mutex.new
 
@@ -35,8 +37,8 @@ module Mumble
       begin
         PortAudio.init
         unless !recording?
-          @portaudio = PortAudio::Stream.open( :sample_rate => 48000, :frames => 8192, :output => { :device => PortAudio::Device.default_output, :channels => @config.audio_channels, :sample_format => :int16, :suggested_latency => 0.25 })
-          @audiobuffer = PortAudio::SampleBuffer.new(:format   => :int16, :channels => @config.audio_channels, :frames => 8192)
+          @portaudio = PortAudio::Stream.open( :sample_rate => @sample_rate, :frames => 8192, :output => { :device => PortAudio::Device.default_output, :channels => @channels, :sample_format => :int16, :suggested_latency => 0.25 })
+          @audiobuffer = PortAudio::SampleBuffer.new(:format   => :int16, :channels => @channels, :frames => 8192)
           @portaudio.start
           @callback = @client.on_udp_tunnel { |msg| process_udp_tunnel msg }
           spawn_thread :portaudio
@@ -132,7 +134,7 @@ module Mumble
         samples = head.zip(*tail)
           .map { |pcms| pcms.reduce(:+) / pcms.size }   # Average together all the columns of the matrix (merge audio streams)
           .flatten                                      # Flatten the resulting 1d matrix
-        @audiobuffer = PortAudio::SampleBuffer.new( :format => :int16, :channels => @config.audio_channels, :frames => send.size / 2 +1)
+        @audiobuffer = PortAudio::SampleBuffer.new( :format => :int16, :channels => @channels, :frames => send.size / 2 +1)
         @audiobuffer.add(sample.pack 's*')
         begin
           @portaudio << @audiobuffer
