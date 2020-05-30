@@ -14,7 +14,7 @@ module Mumble
 
     def connect
       context = OpenSSL::SSL::SSLContext.new
-      context.min_version = :TLSv1
+      context.min_version = OpenSSL::SSL::TLS1_VERSION
       context.verify_mode = OpenSSL::SSL::VERIFY_NONE
       [:key, :cert].each { |s| context.send("#{s}=", @cert_manager.send(s)) }
       begin
