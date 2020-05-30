@@ -62,8 +62,8 @@ module Mumble
         require 'ruby-portaudio'
         PortAudio.init
         unless playing?
-          @portaudio = PortAudio::Stream.open( :sample_rate => @sample_rate, :frames => 8192, :input => { :device => PortAudio::Device.default_input, :channels => @channels, :sample_format => :int16, :suggested_latency => 0.05 })
-          @audiobuffer = PortAudio::SampleBuffer.new( :format => :float32, :channels => @channels, :frames => @framesize)
+          @portaudio = PortAudio::Stream.open( :sample_rate => @sample_rate, :frames => @framesize, :input => { :device => PortAudio::Device.default_input, :channels => @channels, :sample_format => :int16, :suggested_latency => 0.05 })
+          @audiobuffer = PortAudio::SampleBuffer.new( :format => :int16, :channels => @channels, :frames => @framesize)
           @portaudio.start
           spawn_threads :portaudio
           @playing = true
@@ -115,7 +115,7 @@ module Mumble
       @framesize= COMPRESSED_SIZE * framelength
       begin
         @encoder.set_frame_size @framesize
-        @audiobuffer = PortAudio::SampleBuffer.new( :format => :float32, :channels => @channels, :frames => @framesize) if !@portaudio.stopped?
+        @audiobuffer = PortAudio::SampleBuffer.new( :format => :int16, :channels => @channels, :frames => @framesize) if !@portaudio.stopped?
       rescue
       end
     end
@@ -141,7 +141,7 @@ module Mumble
         @encoder.vbr_rate = bitrate
         @encoder.prediction_request = 0
       else
-        @encoder = Opus::Encoder.new sample_rate, @framesize, @channels, 7200
+        @encoder = Opus::Encoder.new sample_rate, @framesize, @channels, @framesize * 2
         @encoder.bitrate = bitrate
         @encoder.opus_set_signal Opus::Constants::OPUS_SIGNAL_MUSIC # alternative OPUS_SIGNAL_VOICE  but then constrainded vbr not work.
         begin
