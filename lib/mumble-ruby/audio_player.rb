@@ -10,7 +10,7 @@ module Mumble
       @conn = connection
       @pds = PacketDataStream.new
       @queue = SizedQueue.new 100
-      @wav_format = WaveFile::Format.new :mono, :pcm_16, sample_rate
+      @wav_format = WaveFile::Format.new @config.audio_channels, :pcm_16, sample_rate
       @type = type
       @bitrate = bitrate
       @sample_rate = sample_rate
